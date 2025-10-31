@@ -2,14 +2,13 @@
 set -e
 
 #==============================================================#
-# 🦋 PTERODACTYL INSTALLER
+# 🦋 PTERODACTYL PRO INSTALLER
 # Created by: @its_sadaf_officail
-# Our team : % SDF >..
 # Features:
 #   • Animated menu
 #   • Colorful UI
 #   • Panel + Wings + Blueprint theme
-#   • Uninstaller
+#   • Uninstaller (safe)
 #==============================================================#
 
 LOG_PATH="/var/log/ptero-pro.log"
@@ -21,7 +20,6 @@ YELLOW='\033[1;33m'
 BLUE='\033[1;34m'
 CYAN='\033[1;36m'
 MAGENTA='\033[1;35m'
-WHITE='\033[1;37m'
 RESET='\033[0m'
 
 #---------------------- ANIMATION -------------------#
@@ -95,21 +93,21 @@ menu() {
   esac
 }
 
-#---------------------- PANEL -----------------------#
+#---------------------- PANEL INSTALL -----------------------#
 install_panel() {
   animate_text "${BLUE}[*] Installing Pterodactyl Panel...${RESET}"
   progress_bar
-  bash <(curl -sSL https://raw.githubusercontent.com/pterodactyl-installer/pterodactyl-installer/master/install-panel.sh)
+  bash <(curl -s https://pterodactyl-installer.se)
 }
 
-#---------------------- WINGS -----------------------#
+#---------------------- WINGS INSTALL -----------------------#
 install_wings() {
   animate_text "${BLUE}[*] Installing Pterodactyl Wings...${RESET}"
   progress_bar
-  bash <(curl -sSL https://raw.githubusercontent.com/pterodactyl-installer/pterodactyl-installer/master/install-wings.sh)
+  bash <(curl -s https://pterodactyl-installer.se/wings)
 }
 
-#---------------------- THEME -----------------------#
+#---------------------- THEME INSTALL -----------------------#
 install_theme() {
   animate_text "${MAGENTA}[*] Installing Blueprint Theme...${RESET}"
   progress_bar
@@ -118,7 +116,7 @@ install_theme() {
   chown -R www-data:www-data /var/www/pterodactyl/*
 }
 
-#---------------------- ALL -------------------------#
+#---------------------- ALL-IN-ONE INSTALL ------------------#
 install_all() {
   install_panel
   install_wings
@@ -126,7 +124,7 @@ install_all() {
   animate_text "${GREEN}✅ All installations completed successfully!${RESET}"
 }
 
-#---------------------- UNINSTALL -------------------#
+#---------------------- UNINSTALL ---------------------------#
 uninstall_all() {
   animate_text "${RED}[*] Removing Pterodactyl and Wings...${RESET}"
   progress_bar
@@ -136,5 +134,5 @@ uninstall_all() {
   animate_text "${GREEN}✅ Uninstallation complete.${RESET}"
 }
 
-#---------------------- START -----------------------#
+#---------------------- START -------------------------------#
 menu
