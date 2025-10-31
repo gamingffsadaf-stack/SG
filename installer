@@ -1,104 +1,140 @@
 #!/bin/bash
 set -e
 
-######################################################################################
-# Custom Pterodactyl Installer
-# Maintained by Team : % SDF >..
-# License: GPLv3
-######################################################################################
+#==============================================================#
+# 🦋 PTERODACTYL INSTALLER
+# Created by: @its_sadaf_officail
+# Our team : % SDF >..
+# Features:
+#   • Animated menu
+#   • Colorful UI
+#   • Panel + Wings + Blueprint theme
+#   • Uninstaller
+#==============================================================#
 
-LOG_PATH="/var/log/pterodactyl-installer.log"
+LOG_PATH="/var/log/ptero-pro.log"
 
-#=======================#
-# COLORS & TYPEWRITER   #
-#=======================#
-RED="\e[31m"
-GREEN="\e[32m"
-YELLOW="\e[33m"
-BLUE="\e[34m"
-MAGENTA="\e[35m"
-CYAN="\e[36m"
-WHITE="\e[37m"
-BOLD="\e[1m"
-RESET="\e[0m"
+#---------------------- COLORS ----------------------#
+RED='\033[1;31m'
+GREEN='\033[1;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[1;34m'
+CYAN='\033[1;36m'
+MAGENTA='\033[1;35m'
+WHITE='\033[1;37m'
+RESET='\033[0m'
 
-# টাইপওয়ার্টার ইফেক্ট ফাংশন
-typewriter() {
-    text="$1"
-    delay="${2:-0.002}"
-    for ((i=0; i<${#text}; i++)); do
-        echo -ne "${text:$i:1}"
-        sleep $delay
-    done
-    echo
+#---------------------- ANIMATION -------------------#
+animate_text() {
+  text="$1"
+  for (( i=0; i<${#text}; i++ )); do
+    echo -ne "${text:$i:1}"
+    sleep 0.015
+  done
+  echo ""
 }
 
-#=======================#
-# ASCII LOGO & HEADER   #
-#=======================#
+rainbow() {
+  local colors=("\033[1;31m" "\033[1;33m" "\033[1;32m" "\033[1;36m" "\033[1;34m" "\033[1;35m")
+  local text="$1"
+  for (( i=0; i<${#text}; i++ )); do
+    echo -ne "${colors[$((i % 6))]}${text:$i:1}${RESET}"
+    sleep 0.02
+  done
+  echo ""
+}
+
+progress_bar() {
+  echo -ne "${CYAN}"
+  for ((i = 0; i <= 30; i++)); do
+    echo -ne "█"
+    sleep 0.05
+  done
+  echo -e "${RESET}"
+}
+
+#---------------------- LOGO ------------------------#
 clear
-typewriter "${CYAN}${BOLD}  _________                  __.__  __      ________    _____      _____  .___ _______    ________  ${RESET}"
-typewriter "${CYAN}${BOLD} /   _____/____    ____     |__|__|/  |_   /  _____/   /  _  \\    /     \\ |   |\\      \\  /  _____/  ${RESET}"
-typewriter "${CYAN}${BOLD} \\_____  \\\\__  \\\\  /    \\\\    |  |  \\\\   __\\\\ /   \\\\  ___  /  /_\\  \\\\  /  \\\\ /  \\\\|   |/   |   \\/   \\\\  ___  ${RESET}"
-typewriter "${CYAN}${BOLD} /        \\/ __ \\\\|   |  \\\\   |  |  ||  |   \\\\    \\\\_\\  \\/    |    \\/    Y    \\\\   /    |    \\\\    \\\\_\\  \\\\ ${RESET}"
-typewriter "${CYAN}${BOLD}/_______  (____  /___|  /\\__|  |__||__|    \\\\______  /\\____|__  /\\____|__  /___\\____|__  /\\______  / ${RESET}"
-typewriter "${CYAN}${BOLD}        \\/     \\/     \\/\\______|                  \\/         \\/         \\/            \\/        \\/ ${RESET}"
-typewriter "${YELLOW}-----------------------------------------------------------------------------------------------${RESET}"
-typewriter "${GREEN}            ⚙️  Custom Pterodactyl Installer  |  Powered by @its_sadaf_officail${RESET}"
-typewriter "${YELLOW}-----------------------------------------------------------------------------------------------${RESET}"
-sleep 0.5
+echo -e "${CYAN}"
+cat <<'EOF'
+  _________                  __.__  __      ________    _____      _____  .___ _______    ________  
+ /   _____/____    ____     |__|__|/  |_   /  _____/   /  _  \    /     \ |   |\      \  /  _____/  
+ \_____  \\__  \  /    \    |  |  \   __\ /   \  ___  /  /_\  \  /  \ /  \|   |/   |   \/   \  ___  
+ /        \/ __ \|   |  \   |  |  ||  |   \    \_\  \/    |    \/    Y    \   /    |    \    \_\  \ 
+/_______  (____  /___|  /\__|  |__||__|    \______  /\____|__  /\____|__  /___\____|__  /\______  / 
+        \/     \/     \/\______|                  \/         \/         \/            \/        \/  
+-----------------------------------------------------------------------------------------------
+                 ⚙️  Custom Pterodactyl PRO Installer  |  Powered by @its_sadaf_officail
+-----------------------------------------------------------------------------------------------
+EOF
+echo -e "${RESET}"
+sleep 2
 
-#=======================#
-# CHECK CURL            #
-#=======================#
-if ! command -v curl >/dev/null 2>&1; then
-  typewriter "${RED}* curl is required. Install with apt or yum/dnf.${RESET}"
-  exit 1
-fi
+#---------------------- MENU ------------------------#
+menu() {
+  clear
+  rainbow "🔥 Welcome to Pterodactyl PRO Installer 🔥"
+  echo ""
+  echo -e "${YELLOW}Choose an option:${RESET}"
+  echo "-----------------------------------------"
+  echo -e "${GREEN}[1]${RESET} Install Panel"
+  echo -e "${GREEN}[2]${RESET} Install Wings"
+  echo -e "${GREEN}[3]${RESET} Install Panel + Wings + Blueprint Theme"
+  echo -e "${RED}[4]${RESET} Uninstall Everything"
+  echo -e "${CYAN}[0]${RESET} Exit"
+  echo "-----------------------------------------"
+  read -p "Enter your choice: " choice
 
-#=======================#
-# DOWNLOAD LIB.SH       #
-#=======================#
-[ -f /tmp/lib.sh ] && rm -rf /tmp/lib.sh
-curl -sSL "https://raw.githubusercontent.com/pterodactyl-installer/pterodactyl-installer/master/lib/lib.sh" -o /tmp/lib.sh
-source /tmp/lib.sh
-
-#=======================#
-# EXECUTE FUNCTION      #
-#=======================#
-execute() {
-    echo -e "\n* pterodactyl-installer $(date) \n" >>$LOG_PATH
-    update_lib_source
-    run_ui "$1" |& tee -a $LOG_PATH
+  case $choice in
+    1) install_panel ;;
+    2) install_wings ;;
+    3) install_all ;;
+    4) uninstall_all ;;
+    0) animate_text "${YELLOW}Exiting...${RESET}"; exit 0 ;;
+    *) animate_text "${RED}Invalid choice!${RESET}"; sleep 1; menu ;;
+  esac
 }
 
-#=======================#
-# MENU OPTIONS          #
-#=======================#
-options=("Install Panel" "Install Wings" "Install Both")
-actions=("panel" "wings" "panel;wings")
+#---------------------- PANEL -----------------------#
+install_panel() {
+  animate_text "${BLUE}[*] Installing Pterodactyl Panel...${RESET}"
+  progress_bar
+  bash <(curl -sSL https://raw.githubusercontent.com/pterodactyl-installer/pterodactyl-installer/master/install-panel.sh)
+}
 
-done=false
-while [ "$done" = false ]; do
-    typewriter "${BLUE}* Select an option:${RESET}"
-    for i in "${!options[@]}"; do
-        typewriter "[${YELLOW}$i${RESET}] ${options[$i]}"
-    done
+#---------------------- WINGS -----------------------#
+install_wings() {
+  animate_text "${BLUE}[*] Installing Pterodactyl Wings...${RESET}"
+  progress_bar
+  bash <(curl -sSL https://raw.githubusercontent.com/pterodactyl-installer/pterodactyl-installer/master/install-wings.sh)
+}
 
-    read -p "* Enter choice [0-${#options[@]}]: " action
-    if [[ ! $action =~ ^[0-9]+$ ]] || [ "$action" -ge "${#actions[@]}" ]; then
-        typewriter "${RED}* Invalid choice!${RESET}"
-        continue
-    fi
+#---------------------- THEME -----------------------#
+install_theme() {
+  animate_text "${MAGENTA}[*] Installing Blueprint Theme...${RESET}"
+  progress_bar
+  cd /var/www/pterodactyl || exit
+  curl -sSL https://raw.githubusercontent.com/BlueprintCoding/pterodactyl-theme/main/install.sh | bash
+  chown -R www-data:www-data /var/www/pterodactyl/*
+}
 
-    done=true
-    IFS=";" read -r i1 i2 <<<"${actions[$action]}"
-    execute "$i1"
-    [ -n "$i2" ] && execute "$i2"
-done
+#---------------------- ALL -------------------------#
+install_all() {
+  install_panel
+  install_wings
+  install_theme
+  animate_text "${GREEN}✅ All installations completed successfully!${RESET}"
+}
 
-#=======================#
-# CLEANUP               #
-#=======================#
-rm -rf /tmp/lib.sh
-typewriter "${GREEN}* Installation finished!${RESET}"
+#---------------------- UNINSTALL -------------------#
+uninstall_all() {
+  animate_text "${RED}[*] Removing Pterodactyl and Wings...${RESET}"
+  progress_bar
+  systemctl stop wings 2>/dev/null || true
+  systemctl disable wings 2>/dev/null || true
+  rm -rf /etc/pterodactyl /var/www/pterodactyl /var/lib/pterodactyl /usr/local/bin/wings
+  animate_text "${GREEN}✅ Uninstallation complete.${RESET}"
+}
+
+#---------------------- START -----------------------#
+menu
