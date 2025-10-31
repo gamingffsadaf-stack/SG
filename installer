@@ -73,13 +73,9 @@ menu() {
   clear
   rainbow "🔥 Welcome to Pterodactyl PRO Installer 🔥"
   echo ""
-  echo -e "${YELLOW}Choose an option:${RESET}"
+  echo -e "${YELLOW}ARE YOU REDY ?:${RESET}"
   echo "-----------------------------------------"
-  echo -e "${GREEN}[1]${RESET} Install Panel"
-  echo -e "${GREEN}[2]${RESET} Install Wings"
-  echo -e "${GREEN}[3]${RESET} Install Panel + Wings + Blueprint Theme"
-  echo -e "${RED}[4]${RESET} Uninstall Everything"
-  echo -e "${CYAN}[0]${RESET} Exit"
+  echo -e "${GREEN}[1]${RESET} YES"
   echo "-----------------------------------------"
   read -p "Enter your choice: " choice
 
