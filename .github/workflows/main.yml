@@ -1,0 +1,58 @@
+name: Tailscale + Backup + Restart VPS
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 */6 * * *"  # Every 6 hours
+
+jobs:
+  backup_and_restart:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Tailscale
+        run: |
+          curl -fsSL https://tailscale.com/install.sh | sh
+          sudo tailscaled &
+          sleep 5
+
+      - name: Authenticate with Tailscale
+        env:
+          TS_AUTHKEY: ${{ secrets.TS_AUTHKEY }}
+        run: sudo tailscale up --authkey=${TS_AUTHKEY} --hostname=github-runner
+
+      - name: Run Backup
+        run: |
+          echo "Running backup..."
+          # Add your backup logic here (rsync, rclone, etc.)
+          echo "Backup complete."
+
+      - name: Wait until VPS goes offline (Tailscale unreachable)
+        env:
+          VPS_TAILSCALE_IP: ${{ secrets.VPS_TAILSCALE_IP }}
+        run: |
+          echo "Waiting for VPS ${VPS_TAILSCALE_IP} to go offline..."
+          while ping -c 1 $VPS_TAILSCALE_IP &>/dev/null; do
+            echo "VPS still online..."
+            sleep 60
+          done
+          echo "✅ VPS appears offline."
+
+      - name: Restart VPS via Provider API
+        env:
+          PROVIDER_API_KEY: ${{ secrets.PROVIDER_API_KEY }}
+          VPS_ID: ${{ secrets.VPS_ID }}
+        run: |
+          echo "Restarting VPS through provider API..."
+          # Example: for DigitalOcean
+          curl -X POST \
+            -H "Authorization: Bearer $PROVIDER_API_KEY" \
+            -H "Content-Type: application/json" \
+            -d '{"type":"power_on"}' \
+            "https://api.digitalocean.com/v2/droplets/$VPS_ID/actions"
+          echo "VPS restart command sent."
+
+      - name: Disconnect Tailscale
+        run: sudo tailscale logout
